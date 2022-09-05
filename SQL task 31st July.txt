@@ -1,0 +1,91 @@
+## Create a loop for a table to insert a record into a tale for two columns in first coumn you have to inset a data ranging from 1 to 100 and in second column you hvae to inset a square of the first column
+create table task1(v1 int, v2 int)
+
+DELIMITER $$
+create procedure filler()
+begin
+declare a int;
+declare b int;
+set a= 1;
+set b= power(a,2);
+gen_data:loop
+insert into task1 values(a,b);
+set a= a+1;
+set b= power(a,2);
+if a= 100 then 
+leave gen_data;
+end if;
+end loop gen_data;
+end $$
+
+call filler()
+
+select * from task1
+
+
+
+
+
+
+
+
+
+
+
+ 
+## create a user defined function to find out a date differences in number of days 
+DELIMITER $$
+create function diff_date3(end_date datetime, start_date datetime)
+returns int
+deterministic
+BEGIN
+declare no_days int;
+set no_days= DATEDIFF(end_date,start_date);
+return no_days;
+END $$
+
+select diff_date3 ('2022-8-13', '2001-8-13');
+
+
+## create a UDF to find out a log base 10 of any given number 
+DELIMITER $$
+create function logarathim1(v1 int)
+returns decimal(20,6)
+deterministic
+BEGIN
+declare log_x decimal(20,6);
+set log_x= log10(v1);
+return log_x;
+END $$
+
+select logarathim1(1000)
+
+
+use sales
+
+
+## create a UDF which will be able to check a total number of records avaible in your table
+DELIMITER $$
+create function rcrd()
+returns int
+deterministic
+begin
+declare record int;
+select count(*) from sales1 into record;
+return record;
+end $$
+
+select rcrd()
+ 
+ 
+## create a procedure to find out  5th highest profit in your sales table you dont have to use rank and windowing function 
+
+select*from sales1
+
+DELIMITER &&
+create procedure ranking()
+begin
+select profit from sales1 order by profit desc limit 1,5;
+end &&
+
+call ranking()
