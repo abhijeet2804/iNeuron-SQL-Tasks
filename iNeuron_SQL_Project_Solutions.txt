@@ -1,0 +1,204 @@
+create database Tasks_project
+use Tasks_project
+
+############# TASK 1 ###########################
+
+create table if not exists shopping_history (
+product varchar(30) not null,
+quantity integer not null,
+unit_price integer not null);
+
+select * from shopping_history
+
+insert into shopping_history values ('milk', 3, 10 ),
+('bread', 7, 3),
+('bread', 5, 2),
+('Eggs',6, 8),
+('Tea', 2, 240),
+('Honey', 1, 300),
+('Spices', 4, 25),
+('Soap', 2, 50),
+('Bodywash', 1, 280),
+('Snacks', 10, 15);
+
+
+select product, (quantity * unit_price) as total_price from shopping_history order by product desc;
+
+
+
+###### TASK 2 ###########
+
+--------------------------- PART (A)--------------------------------------------------------------------
+
+create table phones (
+name varchar(20) not null unique,
+phone_number integer not null unique);
+
+create table calls (
+id integer not null,
+caller integer not null,
+callee integer not null,
+duration integer not null,
+unique(id));
+
+insert into phones values ('Jack', 1234),
+('Lena', 3333),
+('Mark', 9999),
+('Anna', 7582);
+
+
+insert into calls values (25, 1234, 7582, 8),
+(7, 9999, 7582, 1),
+(18, 9999, 3333, 4),
+(2, 7582, 3333, 3),
+(3, 3333,1234,  1),
+(21, 3333, 1234, 1);
+
+select * from phones;
+select * from calls;
+
+
+
+
+######## CREATING A CTE TO FIND THE SOLUTION FOR THE TASK 2 ##################
+########### when we create a CTE the outcome will create a table required_duration with the phone_number column where both the caller and callee duration will be summed up and combined
+######## AFter that we will perform the inner join operation to find the outcome as required in the task 2
+
+
+with required_duration as (
+select caller as phone_number, sum(duration) as duration from calls group by caller
+union all
+select callee as phone_number, sum(duration) as duration from calls group by callee
+)     
+select p.name
+from phones p 
+inner join required_duration rd on rd.phone_number= p.phone_number
+group by name
+having sum(duration) >= 10
+order by name
+
+############### ALTERNATIVELY WE CAN ALSO OBTAIN THE NAME AND CALL DURATION FOR ALL THE INDIVIDUALS IN ASCEDNING ORDER
+with required_duration as (
+select caller as phone_number, sum(duration) as duration from calls group by caller
+union all
+select callee as phone_number, sum(duration) as duration from calls group by callee
+)     
+select p.name, sum(rd.duration) as call_duration
+from phones p inner join required_duration rd on rd.phone_number= p.phone_number
+group by name
+order by call_duration
+
+---------------------------------------------- PART (B)-----------------------------------------------------------------------------------------
+create table phones2 (
+name varchar(20) not null unique,
+phone_number integer not null unique);
+
+create table calls2 (
+id integer not null,
+caller integer not null,
+callee integer not null,
+duration integer not null,
+unique(id));
+
+
+insert into phones2 values ('John', 6356),
+('Addison', 4315),
+('Kate', 8003),
+('Giny', 9831);
+
+
+insert into calls2 values (65, 8003, 9831, 7),
+(100, 9831, 8003, 3),
+(145, 4315, 9831, 18);
+
+
+
+select * from phones2
+select * from calls2
+
+
+with reqd_order as (
+select caller as phone_number, sum(duration) as duration from calls2 group by caller
+union all
+select callee as phone_number, sum(duration) as duration from calls2 group by callee)
+select p.name
+from phones2 p inner join reqd_order ro on ro.phone_number = p.phone_number
+group by name
+having sum(duration) >= 10
+order by name
+
+################# TASK 3 ###########################################################################
+
+################################### PART A ####################################################################
+create table transactions (
+amount int not null,
+date date not null);
+
+insert into transactions (Amount, date) values (1000, '2020-01-06'),
+(-10, '2020-01-14'),
+(-75, '2020-01-20'),
+(-5, '2020-01-25'),
+(-4, '2020-01-29'),
+(2000, '2020-03-10'),
+(-75, '2020-03-12'),
+(-20, '2020-03-15'),
+(40, '2020-03-15'),
+(-50, '2020-03-17'),
+(200, '2020-10-10'),
+(-200, '2020-10-10');
+
+select * from transactions;
+
+########### WITHOUT CONSIDERING THE CARD HOLDING FEE ###############
+select sum(amount) as balance from transactions
+select sum(amount) as balance, month(date) as month from transactions group by month
+
+############ NOW CONSIDERING THE CARD HOLDING FEE ###################
+select sum(amount),count(1), month(date) as month from transactions where amount<0 group by month
+
+########## CONSIDERING THAT I KNOW FOR WHICH MONTHS THE CARD FEE GOT DEDUCTED.
+select (sum(amount) - 55) as Balance from transactions
+
+
+################################### PART B ####################################################################
+
+create table transactions2 (
+amount int not null,
+date date not null);
+
+
+insert into transactions2 (Amount, date) values (1, '2020-06-29'),
+(35, '2020-02-20'),
+(-50, '2020-02-03'),
+(-1, '2020-02-26'),
+(-200, '2020-08-01'),
+(-44, '2020-02-07'),
+(1, '2020-06-29'),
+(1, '2020-06-29'),
+(-100, '2020-12-29'),
+(-100, '2020-12-30'),
+(-100, '2020-12-31');
+
+select * from transactions2
+
+select (sum(amount) - 55) as Balance from transactions2;
+
+
+
+################################### PART C ####################################################################
+
+create table transactions3 (
+amount int not null,
+date date not null);
+
+insert into transactions3 (Amount, date) values (6000, '2020-04-03'),
+(5000, '2020-04-02'),
+(4000, '2020-04-01'),
+(3000, '2020-03-01'),
+(2000, '2020-02-01'),
+(1000, '2020-01-01');
+
+select * from transactions3
+
+select (sum(amount) - 60) as Balance from transactions3;
+

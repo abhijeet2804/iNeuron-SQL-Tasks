@@ -1,0 +1,96 @@
+create database world_population
+use world_population
+
+create table if not exists population2(
+country varchar(100),
+area int,	
+birth_rate	decimal(38,6),
+death_rate decimal(38,6),	
+infant_mortality_rate	decimal(38,6),
+internet_users	int,
+life_exp_at_birth	decimal(38,6),
+maternal_mortality_rate	 decimal(38,6),
+net_migration_rate	 decimal(38,6),
+population	int,
+population_growth_rate   decimal(38,6));
+
+select * from population2;
+
+set session sql_mode= ' ';
+
+load data infile 'E:/cia_factbook___FSDA 18th Sept 2022.csv'
+into table population2
+fields terminated by ','
+enclosed by '"'
+lines terminated by '\n'
+ignore 1 rows;
+
+select * from population2;
+
+select * from population2 order by population desc;
+
+------ Country that has maximum population---------
+
+select country, max(population) as headcount from population2 group by country order by population desc limit 1
+select country, population from population2 where population= (select max(population) from population2)
+
+select* from(select country, population, 
+row_number() over (order by population desc) as 'row number',
+rank() over(order by population desc) as 'row rank',
+dense_rank() over(order by population desc) as main_rank
+from population2) as highly_populated where main_rank= 1;
+
+--------------- Country that has minimum population ---------------
+
+select country, population from population2 where population= (select min(population) from population2)
+
+
+
+
+------ Country that has highest population growth rate---------
+
+select country, population, max(population_growth_rate) from population2 group by country order by population_growth_rate desc limit 1
+
+select * from (select country, population, population_growth_rate,
+row_number() over (order by population_growth_rate desc) as row_num,
+rank() over(order by population_growth_rate desc) as row_rank,
+dense_rank() over(order by population_growth_rate desc) as main_rank
+from population2) as growth_rate where main_rank= 1; 
+
+select country from population2 where population_growth_rate= (select max(population_growth_rate) from population2)
+
+------------------- Which countries will add the most people to their populations next year ----------------------
+select country, population_growth_rate
+from population2
+where population_growth_rate >= 1
+order by population_growth_rate desc
+
+---------------- Countries with higher birth rate than death rate------------------
+
+select country, birth_rate, death_rate
+from population2
+where birth_rate > death_rate
+order by birth_rate desc
+
+
+
+
+--------------- POPULATION DENSITY --------------------
+SELECT AVG(population) as avg_population
+FROM population2
+
+SELECT AVG(area) as avg_area
+FROM population2
+
+select country, area, population from population2 where population > (SELECT AVG(population) FROM population2) 
+and area < (select avg(area) from population2) 
+
+
+
+------------------ COUNTRIES WITH HIGH POPULATION/AREA RATIO-----------------------------------------
+
+select country, population, area, cast(population as float)/cast(area as float) as Ratio 
+from population2 order by Ratio desc; 
+
+
+
